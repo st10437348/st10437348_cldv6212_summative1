@@ -1,0 +1,148 @@
+﻿@model ABCRetailers.Models.ViewModels.HomeViewModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="text-center mb-5">
+    <h1 class="display-4 fw-bold" style="background: linear-gradient(135deg, #6EE7B7, #3B82F6); -webkit-background-clip: text; color: transparent;">
+        <i class="fas fa-store"></i> Welcome to ABC Retailers!
+    </h1>
+    <p class="lead text-gray-600">Your destination for great products and unbeatable prices</p>
+</div>
+
+<div class="container mb-5">
+    <div class="row g-4 justify-content-center">
+
+        @* Show "View Customers" ONLY for Admin *@
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="col-lg-3 col-md-4 col-sm-6 d-flex">
+                <a asp-controller="Customer" asp-action="Index"
+                   class="btn w-100 py-4 flex-grow-1 d-flex flex-column align-items-center justify-content-center rounded-4 shadow-lg text-white"
+                   style="background: linear-gradient(135deg, #3B82F6, #60A5FA); transition: transform 0.2s;">
+                    <i class="fas fa-users fa-2x mb-2"></i>
+                    <span class="fw-semibold">View Customers</span>
+                    <small class="text-white mt-1">(@Model.CustomerCount total)</small>
+                </a>
+            </div>
+        }
+
+        <div class="col-lg-3 col-md-4 col-sm-6 d-flex">
+            <a asp-controller="Product" asp-action="Index"
+               class="btn w-100 py-4 flex-grow-1 d-flex flex-column align-items-center justify-content-center rounded-4 shadow-lg text-white"
+               style="background: linear-gradient(135deg, #10B981, #34D399); transition: transform 0.2s;">
+                <i class="fas fa-box fa-2x mb-2"></i>
+                <span class="fw-semibold">View Products</span>
+                <small class="text-white mt-1">(@Model.ProductCount total)</small>
+            </a>
+        </div>
+
+        <div class="col-lg-3 col-md-4 col-sm-6 d-flex">
+            <a asp-controller="Order" asp-action="Index"
+               class="btn w-100 py-4 flex-grow-1 d-flex flex-column align-items-center justify-content-center rounded-4 shadow-lg text-white"
+               style="background: linear-gradient(135deg, #F59E0B, #FBBF24); transition: transform 0.2s;">
+                <i class="fas fa-shopping-cart fa-2x mb-2"></i>
+                <span class="fw-semibold">View Orders</span>
+                <small class="text-white mt-1">(Order list)</small>
+            </a>
+        </div>
+
+        <div class="col-lg-3 col-md-4 col-sm-6 d-flex">
+            <a asp-controller="Upload" asp-action="Index"
+               class="btn w-100 py-4 flex-grow-1 d-flex flex-column align-items-center justify-content-center rounded-4 shadow-lg text-white"
+               style="background: linear-gradient(135deg, #0EA5E9, #38BDF8); transition: transform 0.2s;">
+                <i class="fas fa-upload fa-2x mb-2"></i>
+                <span class="fw-semibold">Upload Files</span>
+                <small class="text-white mt-1">(Payment proofs)</small>
+            </a>
+        </div>
+
+    </div>
+</div>
+
+
+<style>
+    .btn:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    }
+</style>
+
+@if (Model.CustomerCount == 0 && Model.ProductCount == 0 && Model.OrderCount == 0)
+{
+    <div class="alert rounded-4 p-4 mb-5 shadow-lg" style="background: #FEF3C7; color: #78350F;">
+        <h5><i class="fas fa-exclamation-triangle"></i> First Time Setup</h5>
+        <p>It looks like this is your first time running the application. Click the button below to initialize Azure Storage.</p>
+        <form asp-action="InitializeStorage" method="post" class="d-inline">
+            <button type="submit" class="btn fw-bold text-white" style="background: linear-gradient(135deg, #F59E0B, #FBBF24); transition: transform 0.2s;">
+                <i class="fas fa-cog"></i> Initialize Azure Storage
+            </button>
+        </form>
+    </div>
+}
+
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4 text-center fw-bold" style="color: #FBBF24;">
+            <i class="fas fa-star"></i> Featured Products
+        </h2>
+
+        @if (Model.FeaturedProducts.Any())
+        {
+            <div class="row g-4 justify-content-center">
+                @foreach (var product in Model.FeaturedProducts)
+                {
+                    <div class="col-lg-2 col-md-3 col-sm-4 col-6">
+                        <div class="card h-100 shadow-lg rounded-4 overflow-hidden border-0" style="transition: transform 0.2s;">
+                            @if (!string.IsNullOrEmpty(product.ImageUrl))
+                            {
+                                <img src="@product.ImageUrl" class="card-img-top" alt="@product.ProductName" style="height: 150px; object-fit: cover;">
+                            }
+                            else
+                            {
+                                <div class="card-img-top bg-gray-100 d-flex align-items-center justify-content-center" style="height: 150px;">
+                                    <i class="fas fa-image fa-3x text-gray-400"></i>
+                                </div>
+                            }
+                            <div class="card-body d-flex flex-column">
+                                <h6 class="card-title text-center fw-semibold">@product.ProductName</h6>
+                                <p class="card-text small text-gray-500 text-center flex-grow-1">
+                                    @{
+                                        var desc = product.Description ?? string.Empty;
+                                        var shortDesc = desc.Length > 50 ? desc.Substring(0, 50) + "..." : desc;
+                                    }
+                                    @shortDesc
+                                </p>
+                                <div class="mt-auto text-center">
+                                    <p class="card-text mb-1"><strong class="text-green-500">@product.Price.ToString("C")</strong></p>
+                                    <small class="text-gray-400">Stock: @product.StockAvailable</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info text-center shadow-lg rounded-4 p-3">
+                <i class="fas fa-info-circle"></i> No products available yet.
+                <a asp-controller="Product" asp-action="Create" class="alert-link fw-bold">Add your first product</a>!
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 25px rgba(0,0,0,0.15);
+    }
+</style>
+
+
+
+
+
+
+
